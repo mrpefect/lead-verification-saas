@@ -96,34 +96,62 @@ async def startup_event():
             "password_hash": hashed,
             "role": "super_admin",
             "business_id": None,
+            "email_verified": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         })
         logger.info(f"Super admin created: {admin_email}")
-    elif not verify_password(admin_password, existing.get("password_hash", "")):
-        await _db.users.update_one(
-            {"email": admin_email},
-            {"$set": {"password_hash": hash_password(admin_password)}}
-        )
+    else:
+        update_set = {}
+        if not verify_password(admin_password, existing.get("password_hash", "")):
+            update_set["password_hash"] = hash_password(admin_password)
+        if not existing.get("email_verified"):
+            update_set["email_verified"] = True
+        if update_set:
+            await _db.users.update_one({"email": admin_email}, {"$set": update_set})
 
     # Write test credentials
     os.makedirs("/app/memory", exist_ok=True)
     with open("/app/memory/test_credentials.md", "w") as f:
         f.write(f"""# Test Credentials
 
-## Super Admin
+## Super Admin (pre-seeded, email auto-verified)
 - Email: {admin_email}
 - Password: {admin_password}
 - Role: super_admin
+- Login redirect: /admin/dashboard
 
-## Business Owner
-- Register at: POST /api/auth/register
-- Fields: name, email, password, business_name
+## Business Owner (must verify email before login)
+- Register at: POST /api/auth/register (fields: name, email, password, business_name)
+- After register → redirected to /verify-email-sent
+- Verification link: /verify-email?token={{token}} (24h expiry)
+- Login blocked with 403 until email verified
 
-## Key Endpoints
-- POST /api/auth/login
-- POST /api/auth/register
-- GET /api/auth/me
+### Quickly verify a freshly-registered user during testing
+```
+db.users.updateOne({{email: 'x@y.com'}}, {{$set: {{email_verified: true}}}})
+```
+
+## Resend Email Sandbox Note (IMPORTANT)
+With the default sender `onboarding@resend.dev`, Resend **only delivers** to the
+Resend account owner's verified address. For all other recipients the backend
+logs a `[FALLBACK]` line with the link so dev/test can complete the flow. To
+send to arbitrary recipients, verify a domain at https://resend.com/domains and
+update `SENDER_EMAIL` in `/app/backend/.env`.
+
+## Key Auth Endpoints
+- POST /api/auth/register            → no auto-login, sends verification email
+- POST /api/auth/verify-email        → {{token}}
+- POST /api/auth/resend-verification → {{email}}
+- POST /api/auth/forgot-password     → {{email}} (always returns generic message)
+- POST /api/auth/reset-password      → {{token, new_password}} (1h token, single-use)
+- POST /api/auth/login               → blocks unverified business owners with 403
 - POST /api/auth/logout
+- GET  /api/auth/me
+
+## Frontend Auth Routes
+- /login, /register
+- /verify-email-sent, /verify-email?token=...
+- /forgot-password, /reset-password?token=...
 """)
 
     logger.info("CRM API startup complete")

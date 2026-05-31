@@ -22,7 +22,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(form);
-      navigate('/dashboard');
+      navigate(`/verify-email-sent?email=${encodeURIComponent(form.email)}`);
     } catch (err) {
       setError(formatError(err.response?.data?.detail));
     } finally {

@@ -10,6 +10,7 @@ A Multi-Tenant SaaS CRM Platform that automates lead capture, verification, qual
 - **AI**: OpenAI GPT-4o-mini via Emergent LLM Key (emergentintegrations)
 - **Billing**: Stripe (emergentintegrations) - test mode
 - **SMS**: Twilio (demo mode - any OTP accepted without real credentials)
+- **Email**: Resend (transactional verification emails — `RESEND_API_KEY` configured; sender `onboarding@resend.dev`)
 - **Design**: Light/Clean, white+blue palette, Outfit+Plus Jakarta Sans fonts
 
 ## User Roles
@@ -24,9 +25,15 @@ A Multi-Tenant SaaS CRM Platform that automates lead capture, verification, qual
 ### Authentication
 - [x] JWT login/logout with httpOnly cookies
 - [x] Business owner registration with auto-business creation
+- [x] **Email verification flow via Resend (2026-05-31)** — business owners must verify email before sign-in
+  - `POST /api/auth/verify-email` (token-based, 24h expiry)
+  - `POST /api/auth/resend-verification` (idempotent, prevents enumeration)
+  - Frontend pages: `/verify-email`, `/verify-email-sent`
+  - Login blocks unverified accounts with 403 + "Resend verification email" UI on login page
+  - Super admin auto-marked verified on seed
 - [x] Super admin seeded on startup
 - [x] Brute force protection (5 attempts, 15min lockout)
-- [x] Password reset flow (token-based)
+- [x] **Password reset flow with Resend email (2026-05-31)** — `/forgot-password` and `/reset-password` pages, 1-hour token, idempotent, single-use, no email enumeration
 
 ### Super Admin Module
 - [x] Platform dashboard with analytics

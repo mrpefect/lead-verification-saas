@@ -41,6 +41,8 @@ export const authAPI = {
   me: () => api.get('/api/auth/me'),
   forgotPassword: (email) => api.post('/api/auth/forgot-password', { email }),
   resetPassword: (data) => api.post('/api/auth/reset-password', data),
+  verifyEmail: (token) => api.post('/api/auth/verify-email', { token }),
+  resendVerification: (email) => api.post('/api/auth/resend-verification', { email }),
 };
 
 // Admin

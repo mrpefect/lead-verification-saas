@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
 
   const register = async (formData) => {
     const { data } = await authAPI.register(formData);
-    setUser(data);
+    // Do NOT setUser - account must be email-verified before login
     return data;
   };
 

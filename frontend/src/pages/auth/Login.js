@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { formatError } from '../../utils/api';
-import { Zap, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { authAPI, formatError } from '../../utils/api';
+import { Zap, Eye, EyeOff, Mail, Lock, RefreshCw } from 'lucide-react';
 
 export default function Login() {
   const { login } = useAuth();
@@ -11,18 +11,45 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendInfo, setResendInfo] = useState('');
+  const [resending, setResending] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerification(false);
+    setResendInfo('');
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
       navigate(user.role === 'super_admin' ? '/admin/dashboard' : '/dashboard');
     } catch (err) {
-      setError(formatError(err.response?.data?.detail));
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail;
+      setError(formatError(detail));
+      if (status === 403 && typeof detail === 'string' && detail.toLowerCase().includes('verify your email')) {
+        setNeedsVerification(true);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!form.email) {
+      setResendInfo('Please enter your email above first.');
+      return;
+    }
+    setResending(true);
+    setResendInfo('');
+    try {
+      const { data } = await authAPI.resendVerification(form.email);
+      setResendInfo(data.message || 'Verification email sent.');
+    } catch (err) {
+      setResendInfo(formatError(err.response?.data?.detail));
+    } finally {
+      setResending(false);
     }
   };
 
@@ -48,8 +75,29 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="mb-5 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700" data-testid="login-error">
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700" data-testid="login-error">
               {error}
+            </div>
+          )}
+
+          {needsVerification && (
+            <div className="mb-5 p-3 bg-amber-50 border border-amber-200 rounded-lg" data-testid="needs-verification-block">
+              <p className="text-sm text-amber-800 mb-2">
+                Your email is not verified yet. Check your inbox for the verification link, or resend it below.
+              </p>
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                data-testid="login-resend-verification-btn"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-900 hover:text-amber-950 disabled:opacity-50"
+              >
+                <RefreshCw size={13} className={resending ? 'animate-spin' : ''} />
+                {resending ? 'Sending…' : 'Resend verification email'}
+              </button>
+              {resendInfo && (
+                <p className="mt-2 text-xs text-amber-700" data-testid="login-resend-info">{resendInfo}</p>
+              )}
             </div>
           )}
 
