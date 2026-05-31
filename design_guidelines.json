@@ -1,0 +1,108 @@
+{
+  "theme": "LIGHT",
+  "archetype": "4 (Swiss & High-Contrast) modified for Soft SaaS Trust",
+  "design_philosophy": "Objective, rigid, and functional. Light base for better readability in forms/tables. Blue used as a semantic accent for primary actions, active navigation, and selected states.",
+  "colors": {
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "primary": "#2563EB",
+    "primary_hover": "#1D4ED8",
+    "secondary": "#F1F5F9",
+    "secondary_hover": "#E2E8F0",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "border": "#E2E8F0",
+    "success": "#10B981",
+    "success_bg": "#D1FAE5",
+    "warning": "#F59E0B",
+    "warning_bg": "#FEF3C7",
+    "error": "#EF4444",
+    "error_bg": "#FEE2E2"
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "body_font": "Plus Jakarta Sans",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900",
+      "h3": "text-xl sm:text-2xl font-medium text-slate-800",
+      "h4": "text-lg sm:text-xl font-medium text-slate-800",
+      "body": "text-base leading-relaxed text-slate-600",
+      "small": "text-sm text-slate-500",
+      "label": "text-xs font-semibold tracking-wide uppercase text-slate-500"
+    }
+  },
+  "layout_and_spacing": {
+    "philosophy": "F-pattern for metrics, dense but breathable. Generous padding in cards (p-6/p-8).",
+    "bento_grid": "grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6",
+    "containers": "p-6 md:p-8 rounded-xl border border-slate-200 bg-white shadow-sm",
+    "sidebar": "w-64 border-r border-slate-200 bg-white h-screen fixed hidden md:flex flex-col z-40",
+    "main_content": "md:ml-64 p-6 lg:p-10 min-h-screen bg-slate-50"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-blue-600 text-white hover:bg-blue-700 rounded-lg px-4 py-2 font-medium transition-colors shadow-sm",
+      "secondary": "bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg px-4 py-2 font-medium transition-colors",
+      "outline": "border border-slate-300 bg-transparent text-slate-700 hover:bg-slate-50 rounded-lg px-4 py-2 font-medium transition-colors"
+    },
+    "cards": "rounded-xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-200",
+    "inputs": "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all",
+    "table": "w-full text-sm text-left text-slate-600 border-collapse",
+    "table_header": "text-xs font-semibold tracking-wide uppercase text-slate-500 bg-slate-50 border-b border-slate-200",
+    "table_row": "border-b border-slate-100 hover:bg-slate-50 transition-colors",
+    "chatbot_widget": "fixed bottom-6 right-6 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col z-50",
+    "badges": {
+      "success": "inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800",
+      "warning": "inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800",
+      "error": "inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800",
+      "neutral": "inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800"
+    }
+  },
+  "motion_and_interactions": {
+    "hover_states": "All interactive elements must explicitly set hover colors (e.g., hover:bg-slate-50 hover:text-blue-600).",
+    "transitions": "Use 'transition-all duration-200 ease-in-out' for buttons and cards.",
+    "focus_states": "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+  },
+  "iconography": {
+    "library": "lucide-react",
+    "style": "clean, consistent stroke width (1.5px)"
+  },
+  "media": {
+    "hero_background": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/28d99ec3-47c6-4ad6-8b2f-9c25d414e6b8/images/8beb8972bfa835d1ebd9f8291809dac574fe575e69ee22b36f8e62f87fd7d570.png",
+      "description": "Minimalist white and light blue 3d abstract background, geometric shapes"
+    },
+    "business_owner_1": {
+      "url": "https://images.unsplash.com/photo-1543132220-3ec99c6094dc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwzfHxidXNpbmVzcyUyMG93bmVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgwMjEyMjg1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Business owner portrait"
+    },
+    "business_owner_2": {
+      "url": "https://images.unsplash.com/photo-1630939687530-241d630735df?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMG93bmVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzgwMjEyMjg1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Smiling female business owner"
+    },
+    "company_logo_1": {
+      "url": "https://images.unsplash.com/photo-1758626099012-2904337e9c60?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzV8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBjb21wYW55JTIwbG9nbyUyMG9uJTIwd2hpdGV8ZW58MHx8fHwxNzgwMjEyMjg1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Modern company logo example"
+    },
+    "company_logo_2": {
+      "url": "https://images.pexels.com/photos/26576975/pexels-photo-26576975.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Minimalist company logo"
+    }
+  },
+  "accessibility": {
+    "contrast": "Maintain 4.5:1 contrast for text. Do not use pure transparent backgrounds over content.",
+    "testing": "All interactive elements MUST include data-testid attributes (e.g., data-testid='login-button')."
+  },
+  "instructions_to_main_agent": [
+    "Use Tailwind CSS for all styling. Never use raw inline CSS.",
+    "Component files should be .js using modern React functional components.",
+    "Use standard HTML tags augmented with Tailwind classes for layout instead of rigid container components when custom layout is required.",
+    "Shadcn/UI should be utilized for complex interactive elements (Dialog, Select, Dropdown Menu) but styled according to these guidelines. For date pickers, strictly use Shadcn Calendar.",
+    "All interactive elements MUST include data-testid attributes for testing.",
+    "Maintain strict spacing using the standard Tailwind spacing scale. Err on the side of generous padding (p-6, p-8) for dashboard cards to avoid cramped UI.",
+    "Implement the Chatbot UI as a fixed widget in the bottom right, using a clean rounded rectangle with subtle shadow and header with brand blue.",
+    "Avoid the default 'Inter' font for headings; stick to Outfit for headers and Plus Jakarta Sans for body text. Do not use Space Grotesk.",
+    "Never use placeholders for images; strictly use the URLs provided in the media section of this JSON.",
+    "Go cardless or use rectangular, dense styles for dashboards rather than relying heavily on default Shadcn cards."
+  ]
+}
