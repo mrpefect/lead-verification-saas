@@ -6,6 +6,13 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis
 
 const COLORS = ['#2563EB','#10B981','#F59E0B','#8B5CF6'];
 
+const gradients = {
+  blue:   'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+  green:  'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+  amber:  'linear-gradient(135deg, #d97706 0%, #ea580c 100%)',
+  purple: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
+};
+
 export default function SAAnalytics() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -43,17 +50,21 @@ export default function SAAnalytics() {
             { label: 'Total Leads', value: data?.total_leads || 0, sub: `${data?.verified_leads || 0} verified`, icon: Users, color: 'green' },
             { label: 'Appointments', value: data?.total_appointments || 0, sub: `${data?.confirmed_appointments || 0} confirmed`, icon: Calendar, color: 'amber' },
             { label: 'Verification Rate', value: data?.total_leads ? `${Math.round((data.verified_leads / data.total_leads) * 100)}%` : '0%', sub: 'Of all leads', icon: CheckCircle, color: 'purple' },
-          ].map(({ label, value, sub, icon: Icon, color }) => {
-            const colors = { blue: 'bg-blue-50 text-blue-600', green: 'bg-emerald-50 text-emerald-600', amber: 'bg-amber-50 text-amber-600', purple: 'bg-purple-50 text-purple-600' };
-            return (
-              <div key={label} className="bg-white rounded-xl border border-slate-200 p-6">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${colors[color]}`}><Icon size={18} /></div>
-                <p className="text-2xl font-bold text-slate-900 mb-0.5" style={{fontFamily: 'Outfit, sans-serif'}}>{value}</p>
-                <p className="text-sm text-slate-600">{label}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{sub}</p>
+          ].map(({ label, value, sub, icon: Icon, color }) => (
+            <div
+              key={label}
+              className="rounded-2xl p-6 relative overflow-hidden hover:scale-[1.02] transition-transform duration-200 cursor-default"
+              style={{ background: gradients[color] }}
+            >
+              <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{background: 'rgba(255,255,255,0.3)'}} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 relative" style={{background: 'rgba(255,255,255,0.2)'}}>
+                <Icon size={18} className="text-white" />
               </div>
-            );
-          })}
+              <p className="text-3xl font-bold text-white mb-0.5 relative" style={{fontFamily: 'Outfit, sans-serif'}}>{value}</p>
+              <p className="text-sm relative" style={{color: 'rgba(255,255,255,0.85)'}}>{label}</p>
+              <p className="text-xs mt-0.5 relative" style={{color: 'rgba(255,255,255,0.6)'}}>{sub}</p>
+            </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
