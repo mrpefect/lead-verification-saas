@@ -3,7 +3,8 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard, Users, MessageSquare, Calendar, BarChart2,
-  Bot, Settings, CreditCard, Plug, LogOut, Building2, ChevronRight, Zap
+  Bot, Settings, CreditCard, Plug, LogOut, Building2, ChevronRight, Zap,
+  ShieldCheck, Bell, UserCircle, DollarSign, LifeBuoy, SlidersHorizontal
 } from 'lucide-react';
 
 const businessLinks = [
@@ -11,18 +12,28 @@ const businessLinks = [
   { to: '/leads', icon: Users, label: 'Leads' },
   { to: '/conversations', icon: MessageSquare, label: 'Conversations' },
   { to: '/appointments', icon: Calendar, label: 'Appointments' },
-  { to: '/analytics', icon: BarChart2, label: 'Analytics' },
   { to: '/chatbot', icon: Bot, label: 'AI Chatbot' },
+  { to: '/lead-verification', icon: ShieldCheck, label: 'Lead Verification' },
+  { to: '/notifications', icon: Bell, label: 'Notifications' },
+  { to: '/analytics', icon: BarChart2, label: 'Analytics' },
   { to: '/integrations', icon: Plug, label: 'Integrations' },
   { to: '/settings', icon: Settings, label: 'Settings' },
-  { to: '/billing', icon: CreditCard, label: 'Billing' },
+  { to: '/profile', icon: UserCircle, label: 'Profile' },
 ];
 
 const adminLinks = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/businesses', icon: Building2, label: 'Businesses' },
-  { to: '/admin/leads', icon: Users, label: 'All Leads' },
+  { to: '/admin/subscriptions', icon: CreditCard, label: 'Subscriptions' },
+  { to: '/admin/leads', icon: Users, label: 'Leads' },
+  { to: '/admin/appointments', icon: Calendar, label: 'Appointments' },
+  { to: '/admin/chatbots', icon: Bot, label: 'Chatbots' },
+  { to: '/admin/integrations', icon: Plug, label: 'Integrations' },
   { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
+  { to: '/admin/payments', icon: DollarSign, label: 'Payments' },
+  { to: '/admin/support', icon: LifeBuoy, label: 'Support' },
+  { to: '/admin/system-settings', icon: SlidersHorizontal, label: 'System Settings' },
+  { to: '/admin/profile', icon: UserCircle, label: 'Profile' },
 ];
 
 export default function Sidebar() {

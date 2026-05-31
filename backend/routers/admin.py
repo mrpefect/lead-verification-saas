@@ -256,3 +256,81 @@ async def list_users(request: Request, page: int = 1, limit: int = 20):
     for u in users:
         u["id"] = str(u.pop("_id"))
     return {"users": users, "total": total}
+
+
+# ── Payments (all transactions) ──────────────────────────────────────────────
+@router.get("/payments")
+async def list_all_payments(request: Request, page: int = 1, limit: int = 20):
+    await require_super_admin(request)
+    db = database.db
+    skip = (page - 1) * limit
+    cursor = db.payment_transactions.find({}).skip(skip).limit(limit).sort("created_at", -1)
+    transactions = await cursor.to_list(limit)
+    total = await db.payment_transactions.count_documents({})
+    for t in transactions:
+        t["id"] = str(t.pop("_id"))
+    return {"transactions": transactions, "total": total}
+
+
+# ── Support tickets ───────────────────────────────────────────────────────────
+class SupportTicketInput(BaseModel):
+    subject: str
+    message: str
+    priority: Optional[str] = "medium"
+
+
+class SupportUpdateInput(BaseModel):
+    status: Optional[str] = None
+    reply: Optional[str] = None
+
+
+@router.get("/support")
+async def list_tickets(request: Request):
+    await require_super_admin(request)
+    db = database.db
+    cursor = db.support_tickets.find({}).sort("created_at", -1).limit(50)
+    tickets = await cursor.to_list(50)
+    for t in tickets:
+        t["id"] = str(t.pop("_id"))
+    return {"tickets": tickets}
+
+
+@router.put("/support/{ticket_id}")
+async def update_ticket(request: Request, ticket_id: str, input: SupportUpdateInput):
+    await require_super_admin(request)
+    db = database.db
+    update = {}
+    if input.status:
+        update["status"] = input.status
+    if input.reply:
+        update.setdefault("replies", [])
+        now = datetime.now(timezone.utc).isoformat()
+        await db.support_tickets.update_one(
+            {"_id": ObjectId(ticket_id)},
+            {"$push": {"replies": {"from": "admin", "message": input.reply, "created_at": now}}}
+        )
+    if update:
+        await db.support_tickets.update_one({"_id": ObjectId(ticket_id)}, {"$set": update})
+    return {"message": "Ticket updated"}
+
+
+# ── System Settings ───────────────────────────────────────────────────────────
+@router.get("/system-settings")
+async def get_system_settings(request: Request):
+    await require_super_admin(request)
+    db = database.db
+    doc = await db.system_settings.find_one({"_id": "global"})
+    if not doc:
+        return {}
+    doc.pop("_id", None)
+    return doc
+
+
+@router.put("/system-settings")
+async def update_system_settings(request: Request, body: dict):
+    await require_super_admin(request)
+    db = database.db
+    body.pop("_id", None)
+    body["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.system_settings.update_one({"_id": "global"}, {"$set": body}, upsert=True)
+    return {"message": "System settings updated"}

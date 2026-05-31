@@ -3,19 +3,34 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+
+// Super Admin pages
 import SADashboard from './pages/superadmin/SADashboard';
 import SABusinesses from './pages/superadmin/SABusinesses';
+import SASubscriptions from './pages/superadmin/SASubscriptions';
 import SALeads from './pages/superadmin/SALeads';
+import SAAppointments from './pages/superadmin/SAAppointments';
+import SAChatbots from './pages/superadmin/SAChatbots';
+import SAIntegrations from './pages/superadmin/SAIntegrations';
 import SAAnalytics from './pages/superadmin/SAAnalytics';
+import SAPayments from './pages/superadmin/SAPayments';
+import SASupport from './pages/superadmin/SASupport';
+import SASystemSettings from './pages/superadmin/SASystemSettings';
+import SAProfile from './pages/superadmin/SAProfile';
+
+// Business Owner pages
 import Dashboard from './pages/business/Dashboard';
 import Leads from './pages/business/Leads';
 import Conversations from './pages/business/Conversations';
 import Appointments from './pages/business/Appointments';
-import Analytics from './pages/business/Analytics';
 import Chatbot from './pages/business/Chatbot';
-import Settings from './pages/business/Settings';
-import Billing from './pages/business/Billing';
+import LeadVerification from './pages/business/LeadVerification';
+import Notifications from './pages/business/Notifications';
+import Analytics from './pages/business/Analytics';
 import Integrations from './pages/business/Integrations';
+import Settings from './pages/business/Settings';
+import Profile from './pages/business/Profile';
+import Billing from './pages/business/Billing';
 import './index.css';
 
 function ProtectedRoute({ children, role }) {
@@ -55,19 +70,30 @@ function App() {
           {/* Super Admin Routes */}
           <Route path="/admin/dashboard" element={<ProtectedRoute role="super_admin"><SADashboard /></ProtectedRoute>} />
           <Route path="/admin/businesses" element={<ProtectedRoute role="super_admin"><SABusinesses /></ProtectedRoute>} />
+          <Route path="/admin/subscriptions" element={<ProtectedRoute role="super_admin"><SASubscriptions /></ProtectedRoute>} />
           <Route path="/admin/leads" element={<ProtectedRoute role="super_admin"><SALeads /></ProtectedRoute>} />
+          <Route path="/admin/appointments" element={<ProtectedRoute role="super_admin"><SAAppointments /></ProtectedRoute>} />
+          <Route path="/admin/chatbots" element={<ProtectedRoute role="super_admin"><SAChatbots /></ProtectedRoute>} />
+          <Route path="/admin/integrations" element={<ProtectedRoute role="super_admin"><SAIntegrations /></ProtectedRoute>} />
           <Route path="/admin/analytics" element={<ProtectedRoute role="super_admin"><SAAnalytics /></ProtectedRoute>} />
+          <Route path="/admin/payments" element={<ProtectedRoute role="super_admin"><SAPayments /></ProtectedRoute>} />
+          <Route path="/admin/support" element={<ProtectedRoute role="super_admin"><SASupport /></ProtectedRoute>} />
+          <Route path="/admin/system-settings" element={<ProtectedRoute role="super_admin"><SASystemSettings /></ProtectedRoute>} />
+          <Route path="/admin/profile" element={<ProtectedRoute role="super_admin"><SAProfile /></ProtectedRoute>} />
 
           {/* Business Owner Routes */}
           <Route path="/dashboard" element={<ProtectedRoute role="business_owner"><Dashboard /></ProtectedRoute>} />
           <Route path="/leads" element={<ProtectedRoute role="business_owner"><Leads /></ProtectedRoute>} />
           <Route path="/conversations" element={<ProtectedRoute role="business_owner"><Conversations /></ProtectedRoute>} />
           <Route path="/appointments" element={<ProtectedRoute role="business_owner"><Appointments /></ProtectedRoute>} />
-          <Route path="/analytics" element={<ProtectedRoute role="business_owner"><Analytics /></ProtectedRoute>} />
           <Route path="/chatbot" element={<ProtectedRoute role="business_owner"><Chatbot /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute role="business_owner"><Settings /></ProtectedRoute>} />
-          <Route path="/billing" element={<ProtectedRoute role="business_owner"><Billing /></ProtectedRoute>} />
+          <Route path="/lead-verification" element={<ProtectedRoute role="business_owner"><LeadVerification /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute role="business_owner"><Notifications /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute role="business_owner"><Analytics /></ProtectedRoute>} />
           <Route path="/integrations" element={<ProtectedRoute role="business_owner"><Integrations /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute role="business_owner"><Settings /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute role="business_owner"><Profile /></ProtectedRoute>} />
+          <Route path="/billing" element={<ProtectedRoute role="business_owner"><Billing /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
