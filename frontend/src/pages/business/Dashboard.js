@@ -5,29 +5,38 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Users, CheckCircle, Calendar, TrendingUp, ArrowUpRight, Clock, Star, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+const gradients = {
+  blue:   'linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)',
+  green:  'linear-gradient(135deg, #059669 0%, #0d9488 100%)',
+  amber:  'linear-gradient(135deg, #d97706 0%, #ea580c 100%)',
+  purple: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
+};
+
 function StatCard({ label, value, sub, icon: Icon, color = 'blue', trend }) {
-  const colors = {
-    blue: 'bg-blue-50 text-blue-600',
-    green: 'bg-emerald-50 text-emerald-600',
-    amber: 'bg-amber-50 text-amber-600',
-    purple: 'bg-purple-50 text-purple-600',
-  };
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-md transition-shadow" data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}>
-      <div className="flex items-start justify-between mb-4">
-        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${colors[color]}`}>
-          <Icon size={18} />
+    <div
+      className="rounded-2xl p-6 relative overflow-hidden hover:scale-[1.02] transition-transform duration-200 cursor-default"
+      style={{ background: gradients[color] }}
+      data-testid={`stat-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      {/* Background glow */}
+      <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full opacity-20" style={{background: 'rgba(255,255,255,0.3)'}} />
+      <div className="absolute -bottom-6 -left-4 w-20 h-20 rounded-full opacity-10" style={{background: 'rgba(255,255,255,0.4)'}} />
+
+      <div className="relative flex items-start justify-between mb-4">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{background: 'rgba(255,255,255,0.2)'}}>
+          <Icon size={18} className="text-white" />
         </div>
         {trend !== undefined && (
-          <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">
-            <ArrowUpRight size={12} />
+          <span className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full" style={{background: 'rgba(255,255,255,0.2)', color: '#fff'}}>
+            <ArrowUpRight size={11} />
             {trend}%
           </span>
         )}
       </div>
-      <p className="text-2xl font-bold text-slate-900 mb-1" style={{fontFamily: 'Outfit, sans-serif'}}>{value}</p>
-      <p className="text-sm font-medium text-slate-600">{label}</p>
-      {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+      <p className="relative text-3xl font-bold text-white mb-1" style={{fontFamily: 'Outfit, sans-serif'}}>{value}</p>
+      <p className="relative text-sm font-medium" style={{color: 'rgba(255,255,255,0.85)'}}>{label}</p>
+      {sub && <p className="relative text-xs mt-0.5" style={{color: 'rgba(255,255,255,0.6)'}}>{sub}</p>}
     </div>
   );
 }
