@@ -1,0 +1,66 @@
+{
+  "summary": "Full-stack testing of AI Lead Verification CRM. All 20 backend API tests pass after fixing 2 critical 500 bugs. All frontend pages load and work correctly. Super admin and business owner flows tested end-to-end.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/leads/",
+        "issue": "500 Internal Server Error - pymongo insert_one mutates doc adding ObjectId _id field, causing JSON serialization failure. Fixed by adding doc.pop('_id', None) before returning.",
+        "priority": "CRITICAL",
+        "status": "FIXED"
+      },
+      {
+        "endpoint": "POST /api/appointments/",
+        "issue": "Same ObjectId serialization bug as leads. Fixed.",
+        "priority": "CRITICAL",
+        "status": "FIXED"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Login page",
+        "issues": ["Demo credentials shown in plain text on login page - minor security concern"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_crm_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Consider removing demo credentials from login page UI for production",
+    "Brute force lockout logic has potential timezone handling edge case in locked_until comparison (auth.py line 131) - works but could be simplified"
+  ],
+  "critical_code_review_comments": [
+    "FIXED: POST /api/leads/ and POST /api/appointments/ - pymongo insert_one mutates doc adding _id ObjectId, causing 500 on return. Pattern: always call doc.pop('_id', None) after insert_one before spreading doc in response.",
+    "Minor: Brute force lockout in auth.py line 131 has complex timezone comparison - should be simplified",
+    "Minor: seed_admin in startup only creates admin if not exists (idempotent), but update branch only updates if password changed - correct behavior"
+  ],
+  "updated_files": [
+    "/app/backend/routers/leads.py",
+    "/app/backend/routers/appointments.py",
+    "/app/backend/tests/test_crm_api.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 after fixes)",
+    "frontend": "100% - all pages load and function correctly"
+  },
+  "test_credentials": {
+    "super_admin": "admin@leadverify.ai / Admin@12345",
+    "business_owner_test": "TEST_owner_abc123@example.com / Test@1234"
+  },
+  "seed_data_creation": "Created TEST_owner_abc123@example.com business owner and TEST Business ABC during testing",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Both critical ObjectId serialization bugs are fixed. All 20 backend tests pass. Frontend tested: login (admin+owner), register, dashboard, leads (Add Lead), appointments (Book Appointment), conversations, analytics, chatbot, settings, billing, integrations, logout - all working. Mocked: Twilio SMS (demo mode), Stripe (test key).",
+  "rca_of_issues": {
+    "bug": "POST /api/leads/ and POST /api/appointments/ returning 500",
+    "root_cause": "Python pymongo's insert_one() mutates the passed dict by adding '_id' (ObjectId) field in-place. When the response does {id: appt_id, **doc}, the _id ObjectId is included which is not JSON serializable by FastAPI's default JSONResponse.",
+    "fix": "Added doc.pop('_id', None) after insert_one() before returning the spread doc in both leads.py and appointments.py",
+    "reproduction": "POST /api/leads/ with valid cookie and body {name, phone} would return 500"
+  }
+}

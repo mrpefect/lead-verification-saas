@@ -1,89 +1,134 @@
-from fastapi import FastAPI, APIRouter
 from dotenv import load_dotenv
+load_dotenv()
+
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
-from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
-import uuid
 from datetime import datetime, timezone
 
+import database
+from routers.auth import router as auth_router
+from routers.admin import router as admin_router
+from routers.leads import router as leads_router
+from routers.conversations import router as conversations_router
+from routers.appointments import router as appointments_router
+from routers.analytics import router as analytics_router
+from routers.chatbot import router as chatbot_router
+from routers.billing import router as billing_router
+from routers.settings import router as settings_router
+from routers.notifications import router as notifications_router
+from routers.integrations import router as integrations_router
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-# MongoDB connection
+# Initialize MongoDB
 mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+_client = AsyncIOMotorClient(mongo_url)
+_db = _client[os.environ['DB_NAME']]
+database.client = _client
+database.db = _db
 
-# Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(title="AI Lead Verification CRM API", version="1.0.0")
 
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
-
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
-
-# Include the router in the main app
-app.include_router(api_router)
+# CORS
+frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+cors_origins_raw = os.environ.get('CORS_ORIGINS', frontend_url)
+cors_origins = [u.strip() for u in cors_origins_raw.split(',') if u.strip() and u.strip() != '*']
+if not cors_origins:
+    cors_origins = [frontend_url, 'http://localhost:3000']
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+# Routes
+app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(admin_router, prefix="/api/admin", tags=["Admin"])
+app.include_router(leads_router, prefix="/api/leads", tags=["Leads"])
+app.include_router(conversations_router, prefix="/api/conversations", tags=["Conversations"])
+app.include_router(appointments_router, prefix="/api/appointments", tags=["Appointments"])
+app.include_router(analytics_router, prefix="/api/analytics", tags=["Analytics"])
+app.include_router(chatbot_router, prefix="/api/chatbot", tags=["Chatbot"])
+app.include_router(billing_router, prefix="/api/billing", tags=["Billing"])
+app.include_router(settings_router, prefix="/api/settings", tags=["Settings"])
+app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
+app.include_router(integrations_router, prefix="/api/integrations", tags=["Integrations"])
+
+
+@app.get("/api")
+async def root():
+    return {"message": "AI Lead Verification CRM", "status": "running"}
+
+
+@app.on_event("startup")
+async def startup_event():
+    from utils.auth_utils import hash_password, verify_password
+
+    # Create indexes
+    await _db.users.create_index("email", unique=True)
+    try:
+        await _db.businesses.create_index("api_key", unique=True, sparse=True)
+    except Exception:
+        pass
+    await _db.leads.create_index([("business_id", 1), ("created_at", -1)])
+    await _db.login_attempts.create_index("identifier")
+    try:
+        await _db.password_reset_tokens.create_index("expires_at", expireAfterSeconds=0)
+    except Exception:
+        pass
+
+    # Seed super admin
+    admin_email = os.environ.get("ADMIN_EMAIL", "admin@leadverify.ai")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "Admin@12345")
+    existing = await _db.users.find_one({"email": admin_email})
+    if existing is None:
+        hashed = hash_password(admin_password)
+        await _db.users.insert_one({
+            "name": "Super Admin",
+            "email": admin_email,
+            "password_hash": hashed,
+            "role": "super_admin",
+            "business_id": None,
+            "created_at": datetime.now(timezone.utc).isoformat()
+        })
+        logger.info(f"Super admin created: {admin_email}")
+    elif not verify_password(admin_password, existing.get("password_hash", "")):
+        await _db.users.update_one(
+            {"email": admin_email},
+            {"$set": {"password_hash": hash_password(admin_password)}}
+        )
+
+    # Write test credentials
+    os.makedirs("/app/memory", exist_ok=True)
+    with open("/app/memory/test_credentials.md", "w") as f:
+        f.write(f"""# Test Credentials
+
+## Super Admin
+- Email: {admin_email}
+- Password: {admin_password}
+- Role: super_admin
+
+## Business Owner
+- Register at: POST /api/auth/register
+- Fields: name, email, password, business_name
+
+## Key Endpoints
+- POST /api/auth/login
+- POST /api/auth/register
+- GET /api/auth/me
+- POST /api/auth/logout
+""")
+
+    logger.info("CRM API startup complete")
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    _client.close()
