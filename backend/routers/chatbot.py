@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ import database
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class ChatMessage(BaseModel):
@@ -41,6 +43,7 @@ def serialize_doc(doc):
 @router.get("/{business_id}/info")
 async def get_chatbot_info(business_id: str):
     db = database.db
+    business = None
     try:
         business = await db.businesses.find_one({"_id": ObjectId(business_id)})
     except Exception:
@@ -61,6 +64,7 @@ async def get_chatbot_info(business_id: str):
 @router.post("/{business_id}/message")
 async def chat_message(business_id: str, input: ChatInput):
     db = database.db
+    business = None
     try:
         business = await db.businesses.find_one({"_id": ObjectId(business_id)})
     except Exception:
@@ -130,6 +134,7 @@ Be concise, friendly, and professional. Keep responses under 100 words."""
         user_msg = UserMessage(text=input.message)
         ai_response = await chat.send_message(user_msg)
     except Exception as e:
+        logger.warning(f"Chatbot LLM call failed: {e}")
         ai_response = "Thank you for reaching out! A team member will contact you shortly."
 
     # Store messages
@@ -152,6 +157,7 @@ Be concise, friendly, and professional. Keep responses under 100 words."""
 @router.post("/{business_id}/lead")
 async def create_chatbot_lead(business_id: str, input: WidgetLeadInput):
     db = database.db
+    business = None
     try:
         business = await db.businesses.find_one({"_id": ObjectId(business_id)})
     except Exception:

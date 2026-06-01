@@ -182,6 +182,7 @@ async def get_transactions(request: Request):
 async def get_subscription(request: Request):
     user = await get_business_owner(request)
     db = database.db
+    business = None
     try:
         business = await db.businesses.find_one({"_id": ObjectId(user["business_id"])})
     except Exception:

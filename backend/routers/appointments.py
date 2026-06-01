@@ -119,6 +119,7 @@ async def create_appointment(request: Request, input: CreateAppointmentInput):
 async def get_appointment(request: Request, appt_id: str):
     user = await get_business_owner(request)
     db = database.db
+    doc = None
     try:
         doc = await db.appointments.find_one({"_id": ObjectId(appt_id), "business_id": user["business_id"]})
     except Exception:

@@ -16,7 +16,11 @@ export default function Conversations() {
       const res = await conversationsAPI.getConversations({ search, limit: 30 });
       setConversations(res.data.conversations || []);
       setTotal(res.data.total || 0);
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('Failed to fetch conversations', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchConversations(); }, [search]);
@@ -95,7 +99,7 @@ export default function Conversations() {
               </div>
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {(selected.messages || []).map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div key={`${msg.role}-${msg.timestamp || i}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     {msg.role === 'assistant' && (
                       <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
                         <span className="text-xs font-bold text-white">AI</span>

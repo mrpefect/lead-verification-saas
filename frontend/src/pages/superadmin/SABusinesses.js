@@ -16,7 +16,16 @@ const PLAN_COLORS = {
 };
 
 function CreateBusinessModal({ onClose, onCreate }) {
-  const [form, setForm] = useState({ name: '', email: '', phone: '', website: '', owner_name: '', owner_password: 'TempPass@123', subscription_plan: 'starter' });
+  // Generate a one-time strong password the admin can share with the owner.
+  const tempPassword = React.useMemo(() => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let pw = '';
+    const arr = new Uint32Array(12);
+    (window.crypto || window.msCrypto).getRandomValues(arr);
+    for (let i = 0; i < arr.length; i++) pw += chars[arr[i] % chars.length];
+    return pw;
+  }, []);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', website: '', owner_name: '', owner_password: tempPassword, subscription_plan: 'starter' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -83,7 +92,11 @@ export default function SABusinesses() {
       const res = await adminAPI.getBusinesses({ page, limit: 15, search });
       setBusinesses(res.data.businesses || []);
       setTotal(res.data.total || 0);
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('Failed to fetch businesses', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchBusinesses(); }, [page, search]);
@@ -95,7 +108,9 @@ export default function SABusinesses() {
       if (action === 'suspend') await adminAPI.suspendBusiness(id);
       else await adminAPI.activateBusiness(id);
       fetchBusinesses();
-    } catch {}
+    } catch (err) {
+      console.error('Failed to toggle business status', err);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -103,7 +118,9 @@ export default function SABusinesses() {
     try {
       await adminAPI.deleteBusiness(id);
       fetchBusinesses();
-    } catch {}
+    } catch (err) {
+      console.error('Failed to delete business', err);
+    }
   };
 
   const pages = Math.ceil(total / 15);

@@ -123,6 +123,7 @@ async def create_business(request: Request, input: CreateBusinessInput):
 async def get_business(request: Request, business_id: str):
     await require_super_admin(request)
     db = database.db
+    doc = None
     try:
         doc = await db.businesses.find_one({"_id": ObjectId(business_id)})
     except Exception:

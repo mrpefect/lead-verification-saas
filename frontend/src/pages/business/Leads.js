@@ -27,7 +27,9 @@ function LeadModal({ lead, onClose, onUpdate }) {
       await leadsAPI.updateLead(lead.id, form);
       onUpdate();
       onClose();
-    } catch {}
+    } catch (err) {
+      console.error('Failed to update lead', err);
+    }
     setLoading(false);
   };
 
@@ -136,7 +138,11 @@ export default function Leads() {
       const res = await leadsAPI.getLeads({ page, limit: 15, search, status: statusFilter });
       setLeads(res.data.leads || []);
       setTotal(res.data.total || 0);
-    } catch {} finally { setLoading(false); }
+    } catch (err) {
+      console.error('Failed to fetch leads', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchLeads(); }, [page, search, statusFilter]);

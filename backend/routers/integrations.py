@@ -33,6 +33,7 @@ class IntegrationsInput(BaseModel):
 async def get_integrations(request: Request):
     user = await get_business_owner(request)
     db = database.db
+    business = None
     try:
         business = await db.businesses.find_one({"_id": ObjectId(user["business_id"])}, {"integrations": 1, "api_key": 1})
     except Exception:

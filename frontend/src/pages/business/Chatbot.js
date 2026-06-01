@@ -34,7 +34,7 @@ export default function Chatbot() {
       if (ai.welcome_message) {
         setMessages([{ role: 'assistant', content: ai.welcome_message }]);
       }
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(err => console.error('Failed to load chatbot settings', err)).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -46,7 +46,9 @@ export default function Chatbot() {
     try {
       await settingsAPI.updateAISettings({ ...aiForm, faqs: aiForm.faqs });
       alert('AI settings saved!');
-    } catch {}
+    } catch (err) {
+      console.error('Failed to save AI settings', err);
+    }
     setSaving(false);
   };
 
@@ -69,7 +71,8 @@ export default function Chatbot() {
     try {
       const res = await chatbotAPI.sendMessage(user.business_id, { message: msg, session_id: sessionId });
       setMessages(prev => [...prev, { role: 'assistant', content: res.data.response }]);
-    } catch {
+    } catch (err) {
+      console.error('Chatbot send failed', err);
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
     }
     setChatLoading(false);
@@ -129,7 +132,7 @@ export default function Chatbot() {
             <h3 className="text-base font-semibold text-slate-900 mb-4" style={{fontFamily: 'Outfit, sans-serif'}}>FAQs</h3>
             <div className="space-y-3 mb-4">
               {aiForm.faqs.map((faq, i) => (
-                <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                <div key={`${faq.question}-${i}`} className="bg-slate-50 rounded-lg p-3 border border-slate-100">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <p className="text-xs font-semibold text-slate-700 mb-0.5">Q: {faq.question}</p>
@@ -189,7 +192,7 @@ export default function Chatbot() {
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div key={`${msg.role}-${i}-${msg.content?.slice(0,8)}`} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {msg.role === 'assistant' && (
                   <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center mr-2 flex-shrink-0 mt-1">
                     <Bot size={12} className="text-white" />

@@ -45,6 +45,7 @@ async def list_conversations(request: Request, page: int = 1, limit: int = 20, s
 async def get_conversation(request: Request, conv_id: str):
     user = await get_business_owner(request)
     db = database.db
+    doc = None
     try:
         doc = await db.conversations.find_one({"_id": ObjectId(conv_id), "business_id": user["business_id"]})
     except Exception:

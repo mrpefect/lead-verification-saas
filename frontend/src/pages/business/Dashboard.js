@@ -57,7 +57,7 @@ export default function Dashboard() {
       setAnalytics(a.data);
       setRecentLeads(l.data.leads || []);
       setRecentAppts(ap.data.appointments || []);
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(err => console.error('Dashboard load failed', err)).finally(() => setLoading(false));
   }, []);
 
   const statusColors = {

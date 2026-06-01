@@ -18,7 +18,7 @@ export default function Integrations() {
     integrationsAPI.getIntegrations().then(res => {
       setData(res.data);
       setForm(res.data.integrations || {});
-    }).catch(() => {}).finally(() => setLoading(false));
+    }).catch(err => console.error('Failed to load integrations', err)).finally(() => setLoading(false));
   }, []);
 
   const handleSave = async () => {
@@ -27,7 +27,9 @@ export default function Integrations() {
       await integrationsAPI.updateIntegrations(form);
       setMsg('Integrations saved!');
       setTimeout(() => setMsg(''), 3000);
-    } catch {}
+    } catch (err) {
+      console.error('Failed to save integrations', err);
+    }
     setSaving(false);
   };
 
@@ -60,7 +62,9 @@ export default function Integrations() {
       setData(prev => ({ ...prev, api_key: res.data.api_key }));
       setMsg('API key regenerated!');
       setTimeout(() => setMsg(''), 3000);
-    } catch {}
+    } catch (err) {
+      console.error('Failed to regenerate API key', err);
+    }
     setRegenerating(false);
   };
 

@@ -124,6 +124,7 @@ async def create_lead(request: Request, input: CreateLeadInput):
 async def get_lead(request: Request, lead_id: str):
     user = await get_business_owner(request)
     db = database.db
+    doc = None
     try:
         doc = await db.leads.find_one({"_id": ObjectId(lead_id), "business_id": user["business_id"]})
     except Exception:
