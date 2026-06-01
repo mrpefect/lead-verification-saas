@@ -38,6 +38,7 @@ A Multi-Tenant SaaS CRM Platform that automates lead capture, verification, qual
 ### Super Admin Module
 - [x] Platform dashboard with analytics
 - [x] Business CRUD (create, edit, suspend, delete)
+- [x] **Cascade delete (2026-05-31)** — `DELETE /api/admin/businesses/{id}` now also removes the owner user, leads, appointments, conversations, notifications, payment_transactions, password-reset tokens & login attempts. Email becomes available for re-registration immediately.
 - [x] View all leads across all businesses
 - [x] Platform analytics with charts
 

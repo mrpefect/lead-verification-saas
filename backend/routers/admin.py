@@ -179,12 +179,41 @@ async def delete_business(request: Request, business_id: str):
     await require_super_admin(request)
     db = database.db
     try:
-        result = await db.businesses.delete_one({"_id": ObjectId(business_id)})
+        obj_id = ObjectId(business_id)
     except Exception:
         raise HTTPException(status_code=404, detail="Business not found")
-    if result.deleted_count == 0:
+
+    business = await db.businesses.find_one({"_id": obj_id})
+    if not business:
         raise HTTPException(status_code=404, detail="Business not found")
-    return {"message": "Business deleted"}
+
+    # Cascade delete every record tied to this business so the owner's email
+    # can be reused for a fresh signup
+    biz_id_str = str(obj_id)
+    deleted = {
+        "leads": (await db.leads.delete_many({"business_id": biz_id_str})).deleted_count,
+        "appointments": (await db.appointments.delete_many({"business_id": biz_id_str})).deleted_count,
+        "conversations": (await db.conversations.delete_many({"business_id": biz_id_str})).deleted_count,
+        "notifications": (await db.notifications.delete_many({"business_id": biz_id_str})).deleted_count,
+        "payment_transactions": (await db.payment_transactions.delete_many({"business_id": biz_id_str})).deleted_count,
+    }
+
+    # Owner email (used to also wipe pending password-reset tokens)
+    owner_email = (business.get("email") or "").lower().strip()
+
+    # Delete the owner user(s) attached to this business
+    user_filter = {"role": "business_owner", "business_id": biz_id_str}
+    deleted["users"] = (await db.users.delete_many(user_filter)).deleted_count
+
+    # Clean up any pending password-reset / login-attempt records for that email
+    if owner_email:
+        await db.password_reset_tokens.delete_many({"email": owner_email})
+        await db.login_attempts.delete_many({"identifier": {"$regex": f":{owner_email}$"}})
+
+    # Finally remove the business document itself
+    await db.businesses.delete_one({"_id": obj_id})
+
+    return {"message": "Business and all related data deleted", "deleted": deleted}
 
 
 @router.get("/leads")
